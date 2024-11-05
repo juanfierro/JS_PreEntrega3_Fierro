@@ -1,105 +1,29 @@
-
-
-
-// let carrito = [];
-
-
-
-
-// function mostrarProductos(FILTRADO_PRODUCTOS){
-//     const PRODUCTOS_SECTION = document.getElementById('productos');
-//     PRODUCTOS_SECTION.innerHTML = '';
-
-//     FILTRADO_PRODUCTOS.forEach(prod =>{
-//         const CARD_DIV = document.createElement('div');
-//         CARD_DIV.className = 'card-container'
-//         CARD_DIV.innerHTML = 
-//         `
-//         <h3>${prod.nombre}</h3>
-//         <p>${prod.precio}</p>
-//         <button onclick="añadirCarrito(${prod.id})">Comprar</button>
-
-//         `
-//         PRODUCTOS_SECTION.appendChild(CARD_DIV);
-//     })
-// }
-
-
-
-
-
-//funcion de filtrado
-
-// function filtrarProductos(eleccion){
-//     let FILTRADO_PRODUCTOS;
-//     if(eleccion){
-//         FILTRADO_PRODUCTOS = PRODUCTOS_ARRAY.filter(prod => prod.tamaño === eleccion)
-//     }
-//     else{
-//         FILTRADO_PRODUCTOS = PRODUCTOS_ARRAY
-//     }
-//     mostrarProductos(FILTRADO_PRODUCTOS)
-
-// }
-
-// mostrarProductos(PRODUCTOS_ARRAY);
-
-// document.getElementById('todos').addEventListener('click', ()=>filtrarProductos(''));
-// document.getElementById('grande').addEventListener('click', ()=>filtrarProductos('grande'));
-// document.getElementById('mediano').addEventListener('click', ()=>filtrarProductos('mediano'));
-// document.getElementById('pequeño').addEventListener('click', ()=>filtrarProductos('pequeño'));
-
-
 let productos = [
-    {
-        id: 1,
-        nombre: 'Flor de solapa',
-        precio: 10,
-    },
-    {
-        id: 2,
-        nombre: 'Centros de Mesa',
-        precio: 50,
-    },
-    {
-        id: 3,
-        nombre: 'Coronas',
-        precio: 100,
-    },
-    {
-        id: 4,
-        nombre: 'Pulseras',
-        precio: 20,
-    },
-    {
-        id: 5,
-        nombre: 'Ramos',
-        precio: 60,
-    },
-    {
-        id: 6,
-        nombre: 'Estructuras',
-        precio: 200,
-    },
-
-]
+    { id: 1, nombre: 'Flor de solapa', precio: 10 },
+    { id: 2, nombre: 'Centros de Mesa', precio: 50 },
+    { id: 3, nombre: 'Coronas', precio: 100 },
+    { id: 4, nombre: 'Pulseras', precio: 20 },
+    { id: 5, nombre: 'Ramos', precio: 60 },
+    { id: 6, nombre: 'Estructuras', precio: 200 },
+];
 
 
-
-
-
-function mostrarProductos() {
+function mostrarProductos(filtro = '') {
     const productosDiv = document.getElementById('productos');
     productosDiv.innerHTML = '';
 
-    productos.forEach(producto => {
+
+    const productosFiltrados = productos.filter(producto =>
+        producto.nombre.toLowerCase().includes(filtro.toLowerCase())
+    );
+
+
+    productosFiltrados.forEach(producto => {
         const div = document.createElement('div');
         div.innerHTML = `
             <h3>${producto.nombre}</h3>
             <p>Precio: $${producto.precio}</p>
-            <label>Cantidad: 
-                <input type="number" id="cantidad-${producto.id}" value="1" min="1">
-            </label>
+            <input type="number" id="cantidad-${producto.id}" min="1" value="1" style="width: 50px;"> 
             <button onclick="agregarAlCarrito(${producto.id})">Agregar al carrito</button>
         `;
         productosDiv.appendChild(div);
@@ -110,17 +34,15 @@ function mostrarProductos() {
 function agregarAlCarrito(id) {
     const CARRITO = JSON.parse(localStorage.getItem('carrito')) || [];
     const producto = productos.find(prod => prod.id === id);
-
-    const cantidadInput = document.getElementById(`cantidad-${id}`);
-    const cantidad = parseInt(cantidadInput.value);
+    const cantidad = parseInt(document.getElementById(`cantidad-${id}`).value) || 1;
 
     const productoEnCarrito = CARRITO.find(prod => prod.id === id);
+
     if (productoEnCarrito) {
         productoEnCarrito.cantidad += cantidad;
     } else {
-        CARRITO.push({ ...producto, cantidad: cantidad });
+        CARRITO.push({ ...producto, cantidad });
     }
-
 
     localStorage.setItem('carrito', JSON.stringify(CARRITO));
     mostrarCarrito();
@@ -129,22 +51,26 @@ function agregarAlCarrito(id) {
 
 function mostrarCarrito() {
     const CARRITO = JSON.parse(localStorage.getItem('carrito')) || [];
-    
     const carritoList = document.getElementById('carrito');
     carritoList.innerHTML = '';
-
     let total = 0;
-    CARRITO.forEach((producto, index) => {
-        const li = document.createElement('li');
-        li.textContent = `${producto.nombre} - $${producto.precio} x ${producto.cantidad}`;
-        li.innerHTML += ` <button onclick="eliminarDelCarrito(${index})">Eliminar producto</button>`;
-        carritoList.appendChild(li);
 
+    CARRITO.forEach((producto, index) => {
+        let li = document.createElement('li');
+        li.textContent = `${producto.nombre} - $${producto.precio} x ${producto.cantidad}`;
+        li.innerHTML += `<button onclick="eliminarDelCarrito(${index})">Eliminar producto</button>`;
+        carritoList.appendChild(li);
         total += producto.precio * producto.cantidad;
     });
 
     document.getElementById('total').textContent = `Total: $${total}`;
 }
+
+
+document.getElementById('eliminarProductos').addEventListener('click', () => {
+    localStorage.removeItem('carrito');
+    mostrarCarrito();
+});
 
 
 function eliminarDelCarrito(index) {
@@ -154,17 +80,12 @@ function eliminarDelCarrito(index) {
     mostrarCarrito();
 }
 
-// Eliminar todos los productos del carrito
-function eliminarTodosLosProductos() {
-    localStorage.removeItem('carrito');
-    mostrarCarrito();
-}
 
+document.getElementById('busqueda').addEventListener('input', (e) => {
+    mostrarProductos(e.target.value);
+});
 
 document.addEventListener('DOMContentLoaded', () => {
     mostrarProductos();
     mostrarCarrito();
-
-
-    document.getElementById('eliminarProductos').addEventListener('click', eliminarTodosLosProductos);
 });
