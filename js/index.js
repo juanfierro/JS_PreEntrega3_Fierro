@@ -1,52 +1,5 @@
 
 
-// const PRODUCTOS_ARRAY = [
-//     {
-//         id: 1,
-//         nombre: 'frontier',
-//         precio: 1500,
-//         tamaño: 'grande'
-//     },
-//     {
-//         id: 2,
-//         nombre: 'clio',
-//         precio: 1450,
-//         tamaño: 'mediano'
-//     },
-//     {
-//         id: 3,
-//         nombre: 'moto ducati',
-//         precio: 850,
-//         tamaño: 'pequeño'
-//     },
-//     {
-//         id: 4,
-//         nombre: 'ford ka',
-//         precio: 650,
-//         tamaño: 'mediano'
-//     },
-//     {
-//         id: 5,
-//         nombre: 'fiat toro',
-//         precio: 850,
-//         tamaño: 'grande'
-//     },
-//     {
-//         id: 6,
-//         nombre: 'moto vespa',
-//         precio: 650,
-//         tamaño: 'pequeño'
-//     },
-//     {
-//         id: 7,
-//         nombre: 'RAM',
-//         precio: 1500,
-//         tamaño: 'grande'
-//     },
-
-
-// ]
-
 
 // let carrito = [];
 
@@ -131,70 +84,78 @@ let productos = [
 
 ]
 
-function mostrarProductos(){
+
+
+
+function mostrarProductos() {
     const productosDiv = document.getElementById('productos');
+    productosDiv.innerHTML = '';
+
     productos.forEach(producto => {
         const div = document.createElement('div');
-        div.innerHTML = 
-        `
-        <h3>${producto.nombre}</h3>
-        <p>${producto.precio}</p>
-        <button onclick= "agregarAlCarrito(${producto.id})">Agregar al carrito</button>
-        
-        `
+        div.innerHTML = `
+            <h3>${producto.nombre}</h3>
+            <p>${producto.precio}</p>
+            <button onclick="agregarAlCarrito(${producto.id})">Agregar al carrito</button>
+        `;
         productosDiv.appendChild(div);
-
-    })
+    });
 }
 
-
-
-
-
-function agregarAlCarrito(id){
+function agregarAlCarrito(id) {
     const CARRITO = JSON.parse(localStorage.getItem('carrito')) || [];
     const producto = productos.find(prod => prod.id === id);
 
-
     const productoEnCarrito = CARRITO.find(prod => prod.id === id);
-
-    if(productoEnCarrito){
+    if (productoEnCarrito) {
         productoEnCarrito.cantidad += 1;
+    } else {
+        CARRITO.push({ ...producto, cantidad: 1 });
     }
 
-    
-    else{
-        CARRITO.push({...producto, cantidad: 1})
-    }
-
-    localStorage.setItem('carrito', JSON.stringify(CARRITO))
-    mostrarProductos()
-
+    localStorage.setItem('carrito', JSON.stringify(CARRITO));
+    mostrarCarrito();
 }
 
 
-function mostrarCarrito(){
+function mostrarCarrito() {
     const CARRITO = JSON.parse(localStorage.getItem('carrito')) || [];
     
     const carritoList = document.getElementById('carrito');
     carritoList.innerHTML = '';
+
     let total = 0;
-
-
-    CARRITO.forEach((producto, index)=>{
-        let li = document.createElement('li');
-        li.textContent = `${producto.nombre} - ${producto.precio}`
-        li.innerHTML += `<button onclick="eliminarDelCarrito(${index})">Eliminar producto</button>`
+    CARRITO.forEach((producto, index) => {
+        const li = document.createElement('li');
+        li.textContent = `${producto.nombre} - ${producto.precio} x ${producto.cantidad}`;
+        li.innerHTML += `<button onclick="eliminarDelCarrito(${index})">Eliminar producto</button>`;
         carritoList.appendChild(li);
-        total += producto.precio * producto.cantidad
-    })
 
-    document.getElementById('total').textContent = `total: ${total}`
+        total += producto.precio * producto.cantidad;
+    });
+
+    document.getElementById('total').textContent = `Total: $${total}`;
 }
 
-document.addEventListener('DOMContentLoaded', ()=>{
 
+function eliminarDelCarrito(index) {
+    const CARRITO = JSON.parse(localStorage.getItem('carrito')) || [];
+    CARRITO.splice(index, 1);
+    localStorage.setItem('carrito', JSON.stringify(CARRITO));
+    mostrarCarrito(); 
+}
+
+
+function eliminarTodosLosProductos() {
+    localStorage.removeItem('carrito'); 
+    mostrarCarrito();
+}
+
+
+document.addEventListener('DOMContentLoaded', () => {
     mostrarProductos();
     mostrarCarrito();
 
-})
+    
+    document.getElementById('eliminarProductos').addEventListener('click', eliminarTodosLosProductos);
+});
