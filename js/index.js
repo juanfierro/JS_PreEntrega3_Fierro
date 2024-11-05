@@ -87,6 +87,7 @@ let productos = [
 
 
 
+
 function mostrarProductos() {
     const productosDiv = document.getElementById('productos');
     productosDiv.innerHTML = '';
@@ -95,23 +96,31 @@ function mostrarProductos() {
         const div = document.createElement('div');
         div.innerHTML = `
             <h3>${producto.nombre}</h3>
-            <p>${producto.precio}</p>
+            <p>Precio: $${producto.precio}</p>
+            <label>Cantidad: 
+                <input type="number" id="cantidad-${producto.id}" value="1" min="1">
+            </label>
             <button onclick="agregarAlCarrito(${producto.id})">Agregar al carrito</button>
         `;
         productosDiv.appendChild(div);
     });
 }
 
+
 function agregarAlCarrito(id) {
     const CARRITO = JSON.parse(localStorage.getItem('carrito')) || [];
     const producto = productos.find(prod => prod.id === id);
 
+    const cantidadInput = document.getElementById(`cantidad-${id}`);
+    const cantidad = parseInt(cantidadInput.value);
+
     const productoEnCarrito = CARRITO.find(prod => prod.id === id);
     if (productoEnCarrito) {
-        productoEnCarrito.cantidad += 1;
+        productoEnCarrito.cantidad += cantidad;
     } else {
-        CARRITO.push({ ...producto, cantidad: 1 });
+        CARRITO.push({ ...producto, cantidad: cantidad });
     }
+
 
     localStorage.setItem('carrito', JSON.stringify(CARRITO));
     mostrarCarrito();
@@ -127,8 +136,8 @@ function mostrarCarrito() {
     let total = 0;
     CARRITO.forEach((producto, index) => {
         const li = document.createElement('li');
-        li.textContent = `${producto.nombre} - ${producto.precio} x ${producto.cantidad}`;
-        li.innerHTML += `<button onclick="eliminarDelCarrito(${index})">Eliminar producto</button>`;
+        li.textContent = `${producto.nombre} - $${producto.precio} x ${producto.cantidad}`;
+        li.innerHTML += ` <button onclick="eliminarDelCarrito(${index})">Eliminar producto</button>`;
         carritoList.appendChild(li);
 
         total += producto.precio * producto.cantidad;
@@ -142,12 +151,12 @@ function eliminarDelCarrito(index) {
     const CARRITO = JSON.parse(localStorage.getItem('carrito')) || [];
     CARRITO.splice(index, 1);
     localStorage.setItem('carrito', JSON.stringify(CARRITO));
-    mostrarCarrito(); 
+    mostrarCarrito();
 }
 
-
+// Eliminar todos los productos del carrito
 function eliminarTodosLosProductos() {
-    localStorage.removeItem('carrito'); 
+    localStorage.removeItem('carrito');
     mostrarCarrito();
 }
 
@@ -156,6 +165,6 @@ document.addEventListener('DOMContentLoaded', () => {
     mostrarProductos();
     mostrarCarrito();
 
-    
+
     document.getElementById('eliminarProductos').addEventListener('click', eliminarTodosLosProductos);
 });
